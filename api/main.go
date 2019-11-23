@@ -10,25 +10,34 @@ import (
 	"github.com/tmcentee/lets-go/api/models"
 )
 
+type Env struct {
+	db models.Datastore
+}
+
 func main() {
-	models.InitDB("")
+	db, err := models.NewDB("postgres://")
+	if err != nil {
+		log.Panic(err)
+	}
+
+	env := &Env{db}
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/players", playerIndex)
-	router.HandleFunc("/player/{id}", playerSingle)
-	router.HandleFunc("/teams", teamsIndex)
-	router.HandleFunc("/team/{id}", teamSingle)
+	router.HandleFunc("/players", env.playerIndex)
+	router.HandleFunc("/player/{id}", env.playerSingle)
+	router.HandleFunc("/teams", env.teamsIndex)
+	router.HandleFunc("/team/{id}", env.teamSingle)
 
 	log.Fatal(http.ListenAndServe(":8888", router))
 }
 
-func playerIndex(w http.ResponseWriter, r *http.Request) {
+func (env *Env) playerIndex(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(405), 405)
 		return
 	}
-	players, err := models.AllPlayers()
+	players, err := env.db.AllPlayers()
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 		log.Println(err)
@@ -39,12 +48,12 @@ func playerIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func teamsIndex(w http.ResponseWriter, r *http.Request) {
+func (env *Env) teamsIndex(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(405), 405)
 		return
 	}
-	teams, err := models.AllTeams()
+	teams, err := env.db.AllTeams()
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 		log.Println(err)
@@ -55,7 +64,7 @@ func teamsIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func playerSingle(w http.ResponseWriter, r *http.Request) {
+func (env *Env) playerSingle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(405), 405)
 		return
@@ -69,7 +78,7 @@ func playerSingle(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Invalid player ID %s", key)
 	}
 
-	player, err := models.SinglePlayer(playerID)
+	player, err := env.db.SinglePlayer(playerID)
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 		log.Println(err)
@@ -79,7 +88,7 @@ func playerSingle(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%d, %s, %s, %d\n", player.ID, player.FirstName, player.LastName, player.Team)
 }
 
-func teamSingle(w http.ResponseWriter, r *http.Request) {
+func (env *Env) teamSingle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(405), 405)
 		return
@@ -93,7 +102,7 @@ func teamSingle(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Invalid team ID %s", key)
 	}
 
-	team, err := models.SingleTeam(teamID)
+	team, err := env.db.SingleTeam(teamID)
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 		log.Println(err)

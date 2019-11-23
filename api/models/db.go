@@ -7,12 +7,23 @@ import (
 	_ "github.com/lib/pq" //idk this calms down golint
 )
 
-var db *sql.DB
+//Datastore defines availabe database operations
+type Datastore interface {
+	AllPlayers() ([]*Player, error)
+	AllTeams() ([]*Team, error)
+	SinglePlayer(int) (*Player, error)
+	SingleTeam(int) (*Team, error)
+}
 
-//InitDB initializes the database singleton and verfies connection
-func InitDB(connectionString string) {
+//DB struct wrapper around a sql connection pool
+type DB struct {
+	*sql.DB
+}
+
+//NewDB initializes a db connection and returns a DB struct
+func NewDB(connectionString string) (*DB, error) {
 	var err error
-	db, err = sql.Open("postgres", connectionString)
+	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -21,4 +32,6 @@ func InitDB(connectionString string) {
 	if err = db.Ping(); err != nil {
 		log.Panic(err)
 	}
+
+	return &DB{db}, nil
 }

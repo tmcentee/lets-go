@@ -9,7 +9,7 @@ type Player struct {
 }
 
 //AllPlayers returns a list of all players
-func AllPlayers() ([]*Player, error) {
+func (db *DB) AllPlayers() ([]*Player, error) {
 	rows, err := db.Query("SELECT * FROM public.players")
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func AllPlayers() ([]*Player, error) {
 }
 
 //SinglePlayer returns a single player by ID
-func SinglePlayer(ID int) (*Player, error) {
+func (db *DB) SinglePlayer(ID int) (*Player, error) {
 	rows, err := db.Query("SELECT * FROM public.players WHERE ID = $1", ID)
 	if err != nil {
 		return nil, err

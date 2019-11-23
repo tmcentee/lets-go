@@ -8,7 +8,7 @@ type Team struct {
 }
 
 //AllTeams returns a list of all teams in DB
-func AllTeams() ([]*Team, error) {
+func (db *DB) AllTeams() ([]*Team, error) {
 	rows, err := db.Query("SELECT * FROM public.teams")
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func AllTeams() ([]*Team, error) {
 }
 
 //SingleTeam returns a single team by TeamID
-func SingleTeam(ID int) (*Team, error) {
+func (db *DB) SingleTeam(ID int) (*Team, error) {
 	rows, err := db.Query("SELECT * FROM public.teams WHERE ID = $1", ID)
 	if err != nil {
 		return nil, err
