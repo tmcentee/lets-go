@@ -8,13 +8,7 @@ type Player struct {
 	Team      int
 }
 
-//Team describes a sports team
-type Team struct {
-	ID   int
-	Name string
-	City string
-}
-
+//AllPlayers returns a list of all players
 func AllPlayers() ([]*Player, error) {
 	rows, err := db.Query("SELECT * FROM public.players")
 	if err != nil {
@@ -40,6 +34,7 @@ func AllPlayers() ([]*Player, error) {
 	return players, nil
 }
 
+//SinglePlayer returns a single player by ID
 func SinglePlayer(ID int) (*Player, error) {
 	rows, err := db.Query("SELECT * FROM public.players WHERE ID = $1", ID)
 	if err != nil {
